@@ -1,6 +1,5 @@
-<%@page import="java.util.Date"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
 <%@ page import="java.io.*,java.util.*,java.sql.*"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -8,9 +7,10 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">  
-    <title>欢迎进入选课系统</title>
+    <title>Visual Admin Dashboard - Home</title>
     <meta name="description" content="">
     <meta name="author" content="templatemo">
+
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,700' rel='stylesheet' type='text/css'>
     <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -32,38 +32,26 @@
     		ResultSet rs = st.executeQuery("select * from info where username ='"+username+"'");
     		String nickname = null;
     		String dept = null;
-    		String sex = null;
     		int age;
     		String in_year = null;
-    		String birth = null;
-    		String sno = null;
-    		String cno = null;
     		if(rs.next()){
     			nickname = rs.getString("nickname");
     			dept = rs.getString("dept");
-    			sno = rs.getString("sno");
-    			cno = rs.getString("cno");
-    			sex = rs.getString("sex");
     			age = Integer.parseInt(rs.getString("age"));
     			in_year = rs.getString("in_year");
-    			birth = rs.getString("birth");
     		}
     		ct.close();
     	  %>
           <h1>欢迎<%= nickname %></h1>
         </header>
-<!--         <div class="profile-photo-container"> -->
-<!--           <img src="images/profile-photo.jpg" alt="Profile Photo" class="img-responsive">   -->
-<!--           <div class="profile-photo-overlay"></div> -->
-<!--         </div>       -->
         <div class="mobile-menu-icon">
             <i class="fa fa-bars"></i>
         </div>
         <nav class="templatemo-left-nav">          
           <ul>
-            <li><a href="#" class="active"><i class="fa fa-home fa-fw"></i>个人信息</a></li>
+            <li><a href="index.jsp"><i class="fa fa-home fa-fw"></i>个人信息</a></li>
             <li><a href="choose.jsp"><i class="fa fa-bar-chart fa-fw"></i>选课</a></li>
-            <li><a href="lesson.jsp"><i class="fa fa-map-marker fa-fw"></i>修读课程</a></li>
+            <li><a href="#" class="active"><i class="fa fa-map-marker fa-fw"></i>修读课程</a></li>
 <!--             <li><a href="#"><i class="fa fa-users fa-fw"></i>选课记录</a></li> -->
             <li><a href="reviseInfo.jsp"><i class="fa fa-users fa-fw"></i>修改信息</a></li>
             <li><a href="login.jsp"><i class="fa fa-eject fa-fw"></i>注销</a></li>
@@ -72,57 +60,111 @@
       </div>
       <!-- Main content --> 
       <div class="templatemo-content col-1 light-gray-bg">
-      <div class="templatemo-content-widget white-bg col-2">
-              <i class="fa fa-times"></i>
-              <div class="media margin-bottom-30">
-                <div class="media-left padding-right-25">
-                  <a href="">
-                    <img class="media-object img-circle templatemo-img-bordered" src="images/person.jpg" alt="Sunset">
-                  </a>
-                </div>
-                <div class="media-body">
-                  <h2 class="media-heading text-uppercase blue-text"><%= nickname %>(<%= username %>)</h2>
-<!--                   <p>Project Manager</p> -->
-                </div>        
-              </div>
-              <div class="table-responsive">
-                <table class="table">
-                  <tbody>
-                    <tr>
-                      <td><div class="circle green-bg"></div></td>
-                      <td>性别</td>
-                      <td><%= sex %></td>                    
-                    </tr> 
-                    <tr>
-                      <td><div class="circle pink-bg"></div></td>
-                      <td>所在院系</td>
-                      <td><%= dept %></td>                    
-                    </tr>  
-                    <tr>
-                      <td><div class="circle orange-bg"></div></td>
-                      <td>学号</td>
-                      <td><%= sno %></td>                    
-                    </tr> 
-                    <tr>
-                      <td><div class="circle green-bg"></div></td>
-                      <td>班号</td>
-                      <td><%= cno %></td>                    
-                    </tr> 
-                    <tr>
-                      <td><div class="circle blue-bg"></div></td>
-                      <td>入学年份</td>
-                      <td><%= in_year %></td>                    
-                    </tr>  
-                    <tr>
-                      <td><div class="circle yellow-bg"></div></td>
-                      <td>出生年月</td>
-                      <td><%= birth %></td>                    
-                    </tr>                                      
-                  </tbody>
-                </table>
-              </div>             
-            </div>
-      </div>
+      <%
+      	//定义分页变量
+      	int pageSize = 8,pageNow = 1,pageCount = 0,rowCount = 0;
+      	Class.forName("com.mysql.jdbc.Driver");
+      	ct = DriverManager.getConnection("jdbc:mysql://localhost:3306/chooseLesson","root","");
+      	st = ct.createStatement();
+      	rs = st.executeQuery("select count(*) from sc where username="+username+"");
+      	if(rs.next()){
+      		rowCount = rs.getInt(1);
+      	}
+      	if(rowCount%pageSize == 0){
+      		pageCount = rowCount/pageSize;
+      	}else{
+      		pageCount = rowCount/pageSize + 1;
+      	}
+      	int start = 1,end = 5;
+      	if(pageCount < end){
+      		end = pageCount;
+      	}
+      	String pN = request.getParameter("pageNow");
+      	if(pN != null){
+      		pageNow = Integer.parseInt(pN);
+      	}
+      	String s = request.getParameter("start");
+      	if(s != null){
+      		start = Integer.parseInt(s);
+      		if(start + 4 <= pageCount && start > 0){
+      			end = start + 4;
+      		}
+      		else if(start <= 0){
+      			start = 1;
+      			end = 5;
+      			if(pageCount < 5){
+      				end = pageCount;
+      			}
+			}
+      		else if(start + 4 > pageCount){
+      			end = pageCount;
+      			start = pageCount - 4;
+      			if(pageCount < 5){
+      				start = 1;
+      			}
+      		}
+      	}
+      %>
+            <div class="col-1">
+              <div class="panel panel-default templatemo-content-widget white-bg no-padding templatemo-overflow-hidden">
+                <i class="fa fa-times"></i>
+                <div class="panel-heading templatemo-position-relative"><h2 class="text-uppercase">已修课程</h2></div>
+                <div class="table-responsive">
+                  <table class="table table-striped table-bordered">
+                    <thead>
+                      <tr>
+                        <td>No.</td>
+                        <td>课程号</td>
+                        <td>课程名称</td>
+                        <td>课程学分</td>
+                        <td>补退选</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    <%
+                    rs = st.executeQuery("select * from lesson where lessonNo in "+
+      						"(select lessonNo from sc where username="+username+") limit "
+      						+pageSize*(pageNow-1)+","+pageSize+"");
+                  	int i = 1; 
+                	while(rs.next()){
+                		%>
+                		<tr>
+                    	<td><%= i++ %></td>
+                    	<td><%= rs.getString("lessonNo") %></td>
+                    	<td><%= rs.getString("lessonName") %></td>
+                    	<td><%= rs.getString("credit") %></td>
+                    	<td><a href="" class="templatemo-edit-btn">退课</a></td>
+                 		</tr>
+                		<%
+                	}
+                	ct.close();
+                  	%>                    
+                    </tbody>
+                  </table>    
+                </div>                                  
+          </div>        
+        </div>
+        <div class="pagination-wrap">
+            <ul class="pagination">
+              <li><a href="lesson.jsp?start=<%= start-1 %>&pageNow=<%= pageNow %>">◀</a></li>
+           	  <%
+           	  	int j; 
+           	  	for(j=start;j<=end;j++){
+           	  		if(j == pageNow){
+           	  			%>
+           	  			<li class="active"><a href="lesson.jsp?pageNow=<%= j %>"><%= j %><span class="sr-only">(current)</span></a></li>
+           	  			<%
+           	  		}
+           	  		else{
+           	  			%>
+       	  				<li><a href="lesson.jsp?pageNow=<%= j %>&start=<%= start %>"><%= j %></a></li>
+       	  				<%
+           	  		}
+           	  	}
+              %>
+              <li><a href="lesson.jsp?start=<%= start+1 %>&pageNow=<%= pageNow %>">▶</a></li>
+            </ul>
+          </div>
       </div>
     </div>
     

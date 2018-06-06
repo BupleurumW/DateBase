@@ -33,6 +33,7 @@
 
 	<body class="light-gray-bg">
 		<%
+			session.removeAttribute("username");
 			int flag;
 			String s = request.getParameter("error");
 			if(s != null){
@@ -40,7 +41,7 @@
 				if(flag == 1){
 					out.print("<script>alert('密码错误！');</script>");					
 				}else if(flag == 2){
-					out.print("<script>alert('用户名错误！');</script>");					
+					out.print("<script>alert('用户名不存在！');</script>");					
 				}
 			}
 		%>

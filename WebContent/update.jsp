@@ -5,14 +5,16 @@
 <html>  
 <head>  
 <meta http-equiv="Content-Type" content="text/html; charset=gb2312">  
-<title>登录失败</title>  
+<title>修改信息</title>  
 </head>  
 
 <body>  
   
 <%  
-    String u = request.getParameter("username");  
-    String p = request.getParameter("passwd");
+    String oldPwd = request.getParameter("oldPwd");  
+    String newPwd = request.getParameter("oldPwd");
+    String confirmPwd = request.getParameter("confirmPwd");  
+    String nickname = request.getParameter("Nickname");
 //     out.print(u+" "+p);
   
     Class.forName("com.mysql.jdbc.Driver");    
